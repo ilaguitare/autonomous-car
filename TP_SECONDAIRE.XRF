@@ -1,0 +1,12 @@
+WIN32 LX51 CODE BANKING LINKER/LOCATOR V05.01.33
+
+
+INTER-MODULE CROSS-REFERENCE LISTING
+------------------------------------
+
+          NAME. . . . . . . . USAGE   MODULE NAMES
+          ----------------------------------------
+          SIZEBUFPRINTF . . . NUMBER  [_WKRDTP_]: 
+          TIM1_INIT . . . . . NUMBER  [_WKRDTP_]: 
+          XSTACKLEN . . . . . NUMBER  [_WKRDTP_]: 
+          _LINKERSYMB_DUMMY_  NUMBER  [_WKRDTP_]: 

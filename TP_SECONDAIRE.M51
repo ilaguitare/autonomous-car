@@ -1,0 +1,74 @@
+LX51 CODE BANKING LINKER/LOCATOR V05.01.33                                     01/09/25  12:58:54
+WIN32 LX51 CODE BANKING LINKER/LOCATOR V05.01.33,  INVOKED BY:
+LX51 c:\tp\phy4253\main.obj , c:\tp\phy4253\tp_secondaire.DTP TO(c:\tp\phy4253\tp_secondaire.AOF)&
+ PR(c:\tp\phy4253\tp_secondaire.m51) XSIZE(65536) CSIZE(65536) RS(256) RSI(128) IX MAP 
+
+
+INPUT MODULES INCLUDED
+  C:\TP\PHY4253\MAIN.OBJ(MAIN)
+  C:\TP\PHY4253\TP_SECONDAIRE.DTP(_WKRDTP_)
+
+
+LINK MAP OF MODULE: C:\TP\PHY4253\TP_SECONDAIRE.AOF (TP_SECONDAIRE)
+
+    TYPE     BASE       LENGTH    RELOCATION     SEGMENT NAME
+    ----     ----       ------    ----------     ------------
+
+    * * * * * * *   DATA/IDATA    M E M O R Y   * * * * * * *
+    REG      0000H      0008H     ABSOLUTE       "REG BANK 0"
+
+    * * * * * * *   CODE          M E M O R Y   * * * * * * *
+    CODE     0000H      0003H     ABSOLUTE       
+             0003H      0020H                    *** GAP ***
+    CODE     0023H      0003H     ABSOLUTE       
+             0026H      000AH                    *** GAP ***
+    CODE     0030H      001DH     ABSOLUTE       
+
+EXECUTABLE SUMMARY:
+-------------------
+    Total INTERNAL RAM storage requirement:  0008H (8)
+    Total EXTERNAL RAM storage requirement:  0000H (0)
+    Total     CODE     storage requirement:  0023H (35)
+Note:  Summary does not include dynamic stack requirements
+
+
+REFERENCE MAP OF MODULE: C:\TP\PHY4253\TP_SECONDAIRE.AOF (TP_SECONDAIRE)
+
+SEGMENT                           BI_GROUP            DT_GROUP             ID_GROUP             XD_GROUP
+  +--> CALLED SEGMENT          START    LENGTH     START    LENGTH     START    LENGTH     START    LENGTH
+--------------------------------------------------------------------------------------
+
+SYMBOL TABLE FOR C:\TP\PHY4253\TP_SECONDAIRE.AOF(MAIN)
+-------------------------------------------------------
+
+    VALUE              TYPE               NAME
+    -----              ----               ----
+
+	-------            MODULE             MAIN
+	B:0080H            SYMBOL             LED_R
+	B:0081H            SYMBOL             LED_V
+	C:0037H            SYMBOL             INIT
+	C:0036H            SYMBOL             IT_SERIE
+	C:0030H            SYMBOL             DEBUT
+	C:0036H            SYMBOL             FIN
+	C:0000H            LINE#              15
+	C:0023H            LINE#              17
+	C:0030H            LINE#              23
+	C:0033H            LINE#              24
+	C:0036H            LINE#              34
+	C:0037H            LINE#              42
+	C:003AH            LINE#              43
+	C:003DH            LINE#              44
+	C:0040H            LINE#              45
+	C:0043H            LINE#              46
+	C:0046H            LINE#              47
+	C:0049H            LINE#              48
+	C:004CH            LINE#              49
+	-------            ENDMOD             MAIN
+	N:00E8H            PUBLIC             TIM1_INIT
+	N:0010H            PUBLIC             SIZEBUFPRINTF
+	N:0100H            PUBLIC             XSTACKLEN
+	N:0001H            PUBLIC             _LINKERSYMB_DUMMY_
+
+LINK/LOCATE RUN COMPLETE,  NO ERROR FOUND.
+

@@ -1,0 +1,47 @@
+[51 Driver options]
+Link_UseMonitor=0
+Link_UseSpeMonitor=0
+Link_CMXMonitor=0
+Link_WriteableCode=1
+Link_OldMonitor=0
+Link_Baudrate=115
+Link_BreakSeq=Ext UART
+[Debug]
+LastVirtual=P80C52
+RealNickName=
+Explore=1
+Information=0
+InfoSP=1
+ToolName=P80C52
+ToolDll=
+InfoExpr=
+SessionReal=0
+[trace]
+ContinualTrace=0
+NoTrace=1
+FlashingTrace=0
+TogglingTrace=0
+Rollingtrace=1
+ExtendedTrace=1
+Cycletime=0
+Filter=0
+Maxtrace=10
+ChangingTrace=0
+Relativetime=0
+Source=1
+A=0
+B=0
+ResetBeforeRun=0
+ToFile=0
+Graph=1
+File=
+FreqCycle=10
+[XData Segment]
+NbSegment=0
+[Code Segment]
+NbSegment=0
+[tracewatch]
+Nbtrace=0
+[P80C52\UART]
+fEnable-1=0
+ParityCOM-1=0

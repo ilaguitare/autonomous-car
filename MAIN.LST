@@ -1,0 +1,136 @@
+MACRO ASSEMBLER MAIN                                        01/09/25 13:06:51 PAGE     1
+
+
+WIN32 MACRO ASSEMBLER MA51 V06.04.19OBJECT MODULE PLACED IN C:\TP\PHY4253\MAIN.OBJ
+ASSEMBLER INVOKED BY: MA51.EXE C:\TP\PHY4253\MAIN.A51 OJ(C:\TP\PHY4253\MAIN.OBJ) PIN(C:\RIDE\INC;C:\RIDE\INC\51) PIN(C:\RIDE\INC\51\) EP LINES SYNTAX(ASM51) MOD51 PR(C:\TP\PHY4253\MAIN.LST) XR DB PW(80) RB(0) 
+
+LOC     OBJ           LINE    SOURCE
+                         1     ; Nom
+                         2     ; Description
+                         3     ; Mesfioui-Raja Hind, Kazem Ithar
+                         4     
+                         5     ; -----------------------------------------------------------------
+                         6     ; Declaration des symboles
+  0080                   7     LED_R		BIT	P0.0
+  0081                   8     LED_V		BIT	P0.1
+                         9     
+  00E6                  10     TH1_CHRG	EQU	0E6H
+                        11     
+                        12     ; -----------------------------------------------------------------
+                        13     ; Implementation en mémoire programme
+  0000                  14     			ORG	0000H
+0000    020000   F      15     			LJMP	DEBUT
+  0023                  16     			ORG	0023H
+0023    020000   F      17     			LJMP	IT_SERIE			
+  0030                  18     			ORG	0030H
+                        19     
+                        20     ; -----------------------------------------------------------------
+                        21     ; Programme principal
+                        22     DEBUT: 								; debut
+0030    75812F          23     			MOV	SP,#2FH        ; | Init Pile
+0033    120000   F      24     			LCALL	INIT				; | Init()
+                        25     
+                        26     FIN: 									; finD
+                        27     
+                        28     ; -----------------------------------------------------------------
+                        29     ; Interruption Serie
+                        30     ; Parametres passes:
+                        31     ; Parametres retournes:
+                        32     IT_SERIE: 							; debut
+0036    C0D0            33     			PUSH	PSW				; |
+0038    C0E0            34     			PUSH	ACC				; |
+003A    C298            35     			CLR	RI					; | Remise a zero du drapeau de RX
+003C    E599            36     			MOV	A,SBUF			; | (check) <= Parite donnee XOR Parite recu
+003E    A2D0            37     			MOV	C,P				; |
+0040    B09A            38     			ANL	C,/RB8			; |
+0042    92D5            39     			MOV	F0,C				; |
+0044    A29A            40     			MOV	C,RB8				; |
+0046    B0D0            41     			ANL	C,/P				; |
+0048    72D5            42     			ORL	C,F0				; |
+004A    5000     F      43     SI_IT: 	JNC	SN_IT				; | Si (check) = 1
+004C    750000   F      44     			MOV	VAL,#P_FALSE	; | | (Val) <= P_False
+
+*** ERROR #46 IN LINE 44 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'VAL'
+
+*** ERROR #46 IN LINE 44 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'P_FALSE'
+004F    8000     F      45     FSI_IT: 	SJMP	FSN_IT			; | Fin Si
+                        46     SN_IT: 								; | Sinon9
+0051    540F            47     			ANL	A,#00001111B	; | |(Val) <= (donnee) - 30h
+0053    F500     F      48     			MOV	VAL,A				; | |
+
+*** ERROR #46 IN LINE 48 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'VAL'
+                        49     FSN_IT: 								; | Fin Sinon
+0055    D0E0            50     			POP	ACC				; |
+0057    D0D0            51     			POP	PSW				; |
+0059    32              52     			RETI						; fin
+                        53     
+                        54     ; -----------------------------------------------------------------
+                        55     ; Initialisation
+                        56     ; Parametres passes:
+                        57     ; Parametres retournes:
+                        58     INIT: 									; debut
+005A    7598D0          59              MOV	SCON,#11010000B; | Mode 3 Serie avec RX
+005D    758920          60     			MOV	TMOD,#00100000B; | Timer 1 Mode 2
+0060    758700          61     			MOV	PCON,#00H		; | Pas de dedoublement SMOD=0
+0063    758DE6          62     MOV TH1 , # 230 
+0066    758BE6          63     MOV TL1 , # 230 
+0069    758840          64     			MOV	TCON,#01000000B; | Demarrage Timer 1
+006C    75A890          65     			MOV	IE,#10010000B	; | Validation It serie + generale
+006F    22              66     			RET						; fin			
+                        67     			
+                        68     ; -----------------------------------------------------------------
+                        69     ; Fin d assemblage
+                        70     			END
+MACRO ASSEMBLER MAIN                                        01/09/25 13:06:51 PAGE     0
+
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES             REFERENCES
+
+P0 . . . . . . . .  D ADDR   0080H   A                          7 8 
+FSN_IT . . . . . .  C ADDR   0055H   A                          45 49# 
+VAL. . . . . . . .  ? ADDR   0000H   A                          44 48 
+SP . . . . . . . .  D ADDR   0081H   A                          23 
+LED_R. . . . . . .  B ADDR   0080H.0 A                          7# 
+ACC. . . . . . . .  D ADDR   00E0H   A                          34 50 
+LED_V. . . . . . .  B ADDR   0080H.1 A                          8# 
+RB8. . . . . . . .  B ADDR   0098H.2 A                          38 40 
+TH1. . . . . . . .  D ADDR   008DH   A                          62 
+IE . . . . . . . .  D ADDR   00A8H   A                          65 
+TH1_CHRG . . . . .  N NUMB   00E6h                              10# 62 63 
+P. . . . . . . . .  B ADDR   00D0H.0 A                          37 41 
+SBUF . . . . . . .  D ADDR   0099H   A                          36 
+PCON . . . . . . .  D ADDR   0087H   A                          61 
+TL1. . . . . . . .  D ADDR   008BH   A                          63 
+SCON . . . . . . .  D ADDR   0098H   A                          59 
+INIT . . . . . . .  C ADDR   005AH   A                          24 58# 
+IT_SERIE . . . . .  C ADDR   0036H   A                          17 32# 
+DEBUT. . . . . . .  C ADDR   0030H   A                          15 22# 
+TMOD . . . . . . .  D ADDR   0089H   A                          60 
+TCON . . . . . . .  D ADDR   0088H   A                          64 
+F0 . . . . . . . .  B ADDR   00D0H.5 A                          39 42 
+SI_IT. . . . . . .  C ADDR   004AH   A                          43# 
+P_FALSE. . . . . .  ? ADDR   0000H   A                          44 
+PSW. . . . . . . .  D ADDR   00D0H   A                          33 51 
+RI . . . . . . . .  B ADDR   0098H.0 A                          35 
+SN_IT. . . . . . .  C ADDR   0051H   A                          43 46# 
+FIN. . . . . . . .  C ADDR   0036H   A                          26# 
+FSI_IT . . . . . .  C ADDR   004FH   A                          45# 
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     70    ----
+   XDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+REGISTER BANK(S) USED : 0 
+
+ASSEMBLY COMPLETE.   0 WARNING(S)   3 ERROR(S)
