@@ -29,8 +29,6 @@ Compteur_D  data  7Dh
 C_prec      data  7Ch
 C_recu      data  7Bh
 
-Flag_T0     bit   00h
-
 LCD_L1	   equ	00h+80h
 LCD_NbTr    equ   LCD_L1 + 10
 LCD_L2	   equ	40h+80h
@@ -42,8 +40,6 @@ Nb_Tr       equ   R7
 N_Rouge     equ   10
 
 TH1_CHRG		equ	0E6h
-TL0_CHRG    equ   18h
-TH0_CHRG    equ   02h
 
 ; -----------------------------------------------------------------
 ; Implementation en mémoire programme
@@ -51,8 +47,6 @@ TH0_CHRG    equ   02h
    			LJMP	debut
    			org	0003h
 				LJMP	IT_INT0
-				org	000Bh
-				LJMP	IT_Timer0
    			org	0013h
 				LJMP	IT_INT1
 				org	0023h
@@ -76,7 +70,6 @@ fin:			SJMP  fin  				; finD
 Init:									   ; debut
             MOV   C_prec,#00h    ; | Initialisation de C_prec
             MOV   C_recu,#00h    ; | Initialisation de C_recu 
-            CLR   Flag_T0
             CLR   LED_R          ; | 
             CLR   Car_M_A        ; | Definir l etat initial 
             CLR   Info_M_A       ; | 
@@ -87,26 +80,15 @@ Init:									   ; debut
             MOV   Compteur_D,#30h; | Initialisation du compteur droite '0'
             MOV   Nb_Tr,#2Fh     ; | Initialisation du nombre de tour '-1'
          	MOV	SCON,#01000000b; | Mode 1 Serie sans RX
-				MOV	TMOD,#00100001b; | Timer 1 Mode 2				
+				MOV	TMOD,#00100000b; | Timer 1 Mode 2
 				MOV	PCON,#00h		; | Pas de dedoublement SMOD=0
 				MOV	TH1,#TH1_CHRG	; | Chargement de la valeur du Timer 1 
 				MOV	TL1,#TH1_CHRG	; |
 				MOV	TCON,#01000101b; | Demarrage Timer 1
 				LCALL LCD_Init       ; | LCD_Init()
 				SETB  PX0            ; | Priorite 1 a INT0
-				MOV	IE,#10010111b	; | Validation It serie + INT0 + INT1 + Timer0 + generale
+				MOV	IE,#10010101b	; | Validation It serie + generale
 				RET						; fin	
-				
-; -----------------------------------------------------------------
-; Interruption IT_Timer0
-; Parametres passes:
-; Parametres retournes:
-IT_Timer0:	
-            SETB  Laser       ; Laser OFF
-            CLR   Sirene      ; Sirene OFF
-            CLR   Flag_T0     ; Flag_T0 OFF
-            CLR   TR0         ; Arret timer0
-				RETI					; fin	
 
 ; -----------------------------------------------------------------
 ; Interruption INT0 BP Rouge
@@ -163,13 +145,7 @@ IT_Serie:							                       ; debut
             MOV   C,B.1                              ; | 
             ANL   C,/B.0                             ; |       
             ORL   C,F0                               ; | 
-Zsi_parite:  JC   fsi_parite                          ; | Si (Resultat) = 0       
-si_T0:      JNB   Flag_T0,fsi_T0                     ; | | Si (Flag_T0) = 1 alors
-      	   CLR   TR0                                ; | | | Reinitialiser le timer0
-				MOV	TH0,#TH0_CHRG	                    ; | | | 
-				MOV	TL0,#TL0_CHRG				      	  ; | | |
-				SETB  TR0                                ; | | |
-fsi_T0:                                              ; | | Fin de si                                                                                   
+si_parite:  JC   fsi_parite                          ; | Si (Resultat) = 0                                                                                           
       	   CJNE  A,C_prec,si_diff                   ; | | Si (C_prec) != (C_recu)  
       	   LJMP  fsi_diff                           ; | | | 
 si_diff:		                                         ; | | | 
@@ -194,8 +170,6 @@ si_G:       MOV   A,C_prec                           ; | | | | Si (C_prec) = 'G'
             CJNE  A,#'G',fsi_G                       ; | | | | | 
             SETB  Laser                              ; | | | | | (Laser) <-- OFF
             CLR   Sirene                             ; | | | | | 
-            CLR   TR0                                 
-            CLR   Flag_T0                             
 fsi_G:                                               ; | | | | Fin Si                                        
 fcas:			                                         ; | | | Fin cas 
             MOV   C_prec,C_recu                      ; | | (C_prec) <-- (C_recu)
@@ -288,11 +262,6 @@ Droite:									; debut
 Absent:									; debut
             CLR  Laser           ; | Allumer le laser
             SETB  Sirene         ; | Allumer la sirene
-            SETB  Flag_T0        ; | Allumer le Timer0
-            CLR   TR0
-            MOV	TH0,#TH0_CHRG	; | Chargement de la valeur du Timer 0 
-				MOV	TL0,#TL0_CHRG	; |
-            SETB  TR0
 				RET						; fin		
 					
 				
@@ -410,6 +379,4 @@ Rpt_t1:                       ; | | repeter
 ; -----------------------------------------------------------------
 ; Fin d assemblage
 				end
-
-
 

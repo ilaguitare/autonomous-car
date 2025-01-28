@@ -1,4 +1,4 @@
-MACRO ASSEMBLER MAIN                                        01/09/25 13:06:51 PAGE     1
+MACRO ASSEMBLER MAIN                                        01/28/25 13:46:39 PAGE     1
 
 
 WIN32 MACRO ASSEMBLER MA51 V06.04.19OBJECT MODULE PLACED IN C:\TP\PHY4253\MAIN.OBJ
@@ -11,77 +11,421 @@ LOC     OBJ           LINE    SOURCE
                          4     
                          5     ; -----------------------------------------------------------------
                          6     ; Declaration des symboles
-  0080                   7     LED_R		BIT	P0.0
-  0081                   8     LED_V		BIT	P0.1
-                         9     
-  00E6                  10     TH1_CHRG	EQU	0E6H
+  0090                   7     LED_R			BIT	P1.0
+                         8     
+  0093                   9     INFO_M_A    BIT   P1.3
+  0094                  10     CAR_M_A     BIT   P1.4
                         11     
-                        12     ; -----------------------------------------------------------------
-                        13     ; Implementation en mémoire programme
-  0000                  14     			ORG	0000H
-0000    020000   F      15     			LJMP	DEBUT
-  0023                  16     			ORG	0023H
-0023    020000   F      17     			LJMP	IT_SERIE			
-  0030                  18     			ORG	0030H
-                        19     
-                        20     ; -----------------------------------------------------------------
-                        21     ; Programme principal
-                        22     DEBUT: 								; debut
-0030    75812F          23     			MOV	SP,#2FH        ; | Init Pile
-0033    120000   F      24     			LCALL	INIT				; | Init()
+  0091                  12     SIRENE      BIT   P1.1
+  0092                  13     LASER       BIT   P1.2
+                        14     
+  00A0                  15     LCD_BC	   DATA	P2
+  00A7                  16     LCD_RS	   BIT	LCD_BC.7
+  00A6                  17     LCD_RW	   BIT	LCD_BC.6
+  00A5                  18     LCD_E		   BIT	LCD_BC.5
+  0080                  19     LCD_DB	   DATA	P0
+                        20     
+  00B2                  21     BP_R        BIT   P3.2
+  00B3                  22     BP_V        BIT   P3.3
+                        23     
+  0087                  24     BF			   BIT	LCD_DB.7	
                         25     
-                        26     FIN: 									; finD
-                        27     
-                        28     ; -----------------------------------------------------------------
-                        29     ; Interruption Serie
-                        30     ; Parametres passes:
-                        31     ; Parametres retournes:
-                        32     IT_SERIE: 							; debut
-0036    C0D0            33     			PUSH	PSW				; |
-0038    C0E0            34     			PUSH	ACC				; |
-003A    C298            35     			CLR	RI					; | Remise a zero du drapeau de RX
-003C    E599            36     			MOV	A,SBUF			; | (check) <= Parite donnee XOR Parite recu
-003E    A2D0            37     			MOV	C,P				; |
-0040    B09A            38     			ANL	C,/RB8			; |
-0042    92D5            39     			MOV	F0,C				; |
-0044    A29A            40     			MOV	C,RB8				; |
-0046    B0D0            41     			ANL	C,/P				; |
-0048    72D5            42     			ORL	C,F0				; |
-004A    5000     F      43     SI_IT: 	JNC	SN_IT				; | Si (check) = 1
-004C    750000   F      44     			MOV	VAL,#P_FALSE	; | | (Val) <= P_False
-
-*** ERROR #46 IN LINE 44 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'VAL'
-
-*** ERROR #46 IN LINE 44 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'P_FALSE'
-004F    8000     F      45     FSI_IT: 	SJMP	FSN_IT			; | Fin Si
-                        46     SN_IT: 								; | Sinon9
-0051    540F            47     			ANL	A,#00001111B	; | |(Val) <= (donnee) - 30h
-0053    F500     F      48     			MOV	VAL,A				; | |
-
-*** ERROR #46 IN LINE 48 OF main.a51 : UNDEFINED SYMBOL (PASS-2) 'VAL'
-                        49     FSN_IT: 								; | Fin Sinon
-0055    D0E0            50     			POP	ACC				; |
-0057    D0D0            51     			POP	PSW				; |
-0059    32              52     			RETI						; fin
-                        53     
-                        54     ; -----------------------------------------------------------------
-                        55     ; Initialisation
-                        56     ; Parametres passes:
-                        57     ; Parametres retournes:
-                        58     INIT: 									; debut
-005A    7598D0          59              MOV	SCON,#11010000B; | Mode 3 Serie avec RX
-005D    758920          60     			MOV	TMOD,#00100000B; | Timer 1 Mode 2
-0060    758700          61     			MOV	PCON,#00H		; | Pas de dedoublement SMOD=0
-0063    758DE6          62     MOV TH1 , # 230 
-0066    758BE6          63     MOV TL1 , # 230 
-0069    758840          64     			MOV	TCON,#01000000B; | Demarrage Timer 1
-006C    75A890          65     			MOV	IE,#10010000B	; | Validation It serie + generale
-006F    22              66     			RET						; fin			
-                        67     			
-                        68     ; -----------------------------------------------------------------
-                        69     ; Fin d assemblage
-                        70     			END
-MACRO ASSEMBLER MAIN                                        01/09/25 13:06:51 PAGE     0
+  007F                  26     COMPTEUR_G  DATA  7FH
+  007E                  27     COMPTEUR_C  DATA  7EH
+  007D                  28     COMPTEUR_D  DATA  7DH
+  007C                  29     C_PREC      DATA  7CH
+  007B                  30     C_RECU      DATA  7BH
+                        31     
+  0000                  32     FLAG_T0     BIT   00H
+                        33     
+  0080                  34     LCD_L1	   EQU	00H+80H
+  008A                  35     LCD_NBTR    EQU   LCD_L1 + 10
+  00C0                  36     LCD_L2	   EQU	40H+80H
+  00C2                  37     LCD_G 	   EQU	LCD_L2 + 2
+  00C6                  38     LCD_C 	   EQU	LCD_L2 + 6
+  00CA                  39     LCD_D 	   EQU	LCD_L2 + 10
+  REG                   40     NB_TR       EQU   R7
+                        41     
+  000A                  42     N_ROUGE     EQU   10
+                        43     
+  00E6                  44     TH1_CHRG		EQU	0E6H
+  0018                  45     TL0_CHRG    EQU   18H
+  0002                  46     TH0_CHRG    EQU   02H
+                        47     
+                        48     ; -----------------------------------------------------------------
+                        49     ; Implementation en mémoire programme
+  0000                  50     				ORG	0000H
+0000    020052          51        			LJMP	DEBUT
+  0003                  52        			ORG	0003H
+0003    02009B          53     				LJMP	IT_INT0
+  000B                  54     				ORG	000BH
+000B    020092          55     				LJMP	IT_TIMER0
+  0013                  56        			ORG	0013H
+0013    0200B6          57     				LJMP	IT_INT1
+  0023                  58     				ORG	0023H
+0023    0200BB          59     				LJMP	IT_SERIE			
+  0030                  60     				ORG	0030H
+                        61     
+0030    4E622074        62     TXT_L1: 	   DB		'Nb tour = 0     ',00H
+0034    6F757220
+0038    3D203020
+003C    20202020
+0040    00
+0041    473D3020        63     TXT_L2: 	   DB		'G=0 C=0 D=0     ' ,00H
+0045    433D3020
+0049    443D3020
+004D    20202020
+0051    00
+                        64     
+                        65     ; -----------------------------------------------------------------
+                        66     ; Programme principal
+                        67     DEBUT: 								   ; debut
+0052    75812F          68     				MOV	SP,#2FH        ; | Init Pile
+0055    12005A          69     				LCALL	INIT				; | Init()			   	   
+0058    80FE            70     FIN: 			SJMP  FIN  				; finD
+                        71     
+                        72     ; -----------------------------------------------------------------
+                        73     ; Initialisation
+                        74     ; Parametres passes:
+                        75     ; Parametres retournes:
+                        76     INIT: 									   ; debut
+005A    757C00          77                 MOV   C_PREC,#00H    ; | Initialisation de C_prec
+005D    757B00          78                 MOV   C_RECU,#00H    ; | Initialisation de C_recu 
+0060    C200            79                 CLR   FLAG_T0
+0062    C290            80                 CLR   LED_R          ; | 
+0064    C294            81                 CLR   CAR_M_A        ; | Definir l etat initial 
+0066    C293            82                 CLR   INFO_M_A       ; | 
+0068    D292            83                 SETB  LASER          ; | Initialisation du Laser en mode etteint
+006A    C291            84                 CLR   SIRENE         ; | Initialisation de la sirene en mode etteint
+006C    757F30          85                 MOV   COMPTEUR_G,#30H; | Initialisation du compteur gauche '0'
+006F    757E30          86                 MOV   COMPTEUR_C,#30H; | Initialisation du compteur centre '0'
+0072    757D30          87                 MOV   COMPTEUR_D,#30H; | Initialisation du compteur droite '0'
+0075    7F2F            88     MOV R7 , # 2FH 
+0077    759840          89              	MOV	SCON,#01000000B; | Mode 1 Serie sans RX
+007A    758921          90     				MOV	TMOD,#00100001B; | Timer 1 Mode 2				
+007D    758700          91     				MOV	PCON,#00H		; | Pas de dedoublement SMOD=0
+0080    758DE6          92     MOV TH1 , # 230 
+0083    758BE6          93     MOV TL1 , # 230 
+0086    758845          94     				MOV	TCON,#01000101B; | Demarrage Timer 1
+0089    1201A7          95     				LCALL LCD_INIT       ; | LCD_Init()
+008C    D2B8            96     				SETB  PX0            ; | Priorite 1 a INT0
+008E    75A897          97     				MOV	IE,#10010111B	; | Validation It serie + INT0 + INT1 + Timer0 + generale
+0091    22              98     				RET						; fin	
+                        99     				
+                       100     ; -----------------------------------------------------------------
+                       101     ; Interruption IT_Timer0
+                       102     ; Parametres passes:
+                       103     ; Parametres retournes:
+                       104     IT_TIMER0: 	
+0092    D292           105                 SETB  LASER       ; Laser OFF
+0094    C291           106                 CLR   SIRENE      ; Sirene OFF
+0096    C200           107                 CLR   FLAG_T0     ; Flag_T0 OFF
+0098    C28C           108                 CLR   TR0         ; Arret timer0
+009A    32             109     				RETI					; fin	
+                       110     
+                       111     ; -----------------------------------------------------------------
+                       112     ; Interruption INT0 BP Rouge
+                       113     ; Parametres passes:
+                       114     ; Parametres retournes:
+                       115     IT_INT0: 	
+009B    C0E0           116                 PUSH  ACC         ; 
+009D    C2AF           117                 CLR   EA          ; Desactivation de liaison série
+009F    C293           118                 CLR   INFO_M_A    ; Definir l etat de la voiture en arret
+00A1    D294           119                 SETB  CAR_M_A     ; Arreter la voiture
+00A3    C294           120                 CLR   CAR_M_A     ;
+                       121     RPT_INT0:                         
+00A5    B290           122                 CPL   LED_R       ; (LED_R) <= /(LED_R)
+00A7    740A           123     MOV A , # 10 
+00A9    6006           124     TQ_INT0:     JZ    FTQ_INT0    ; Tant que (CTR) != 0
+00AB    14             125                 DEC   A           ; | (CTR) <= (CTR - 1)
+00AC    12021F         126                 LCALL TEMPO       ; | Tempo()
+00AF    80F8           127                 SJMP  TQ_INT0
+                       128     FTQ_INT0:                      ; Fin Tant que 
+                       129                                   
+00B1    80F2           130     JSQ_INT0:    SJMP  RPT_INT0    ; | 
+00B3    D0E0           131                 POP   ACC         ; 
+00B5    32             132     				RETI					; fin	
+                       133     
+                       134     ; -----------------------------------------------------------------
+                       135     ; Interruption INT1 BP Vert
+                       136     ; Parametres passes:
+                       137     ; Parametres retournes:
+                       138     IT_INT1: 	
+00B6    D29C           139     			   SETB  REN  			; (REN) <= 1
+00B8    D290           140     			   SETB  LED_R       ; (LED_R) ON
+00BA    32             141     				RETI					; fin	
+                       142     
+                       143     ; -----------------------------------------------------------------
+                       144     ; Interruption Serie
+                       145     ; Parametres passes:
+                       146     ; Parametres retournes:
+                       147     IT_SERIE: 							                       ; debut
+00BB    C0D0           148     				PUSH	PSW				                    ; |
+00BD    C0F0           149     				PUSH  B
+00BF    C0E0           150     				PUSH	ACC				                    ; |
+00C1    C298           151     				CLR	RI					                    ; | Remise a zero du drapeau de RX
+00C3    E599           152           	   MOV   A,SBUF                             ; | (C_recu) <-- (RXD) 
+00C5    A2E7           153                 MOV   C,ACC.7                            ; | (P_recu) <-- (ACC.7)
+00C7    92F0           154                 MOV   B.0,C                              ; | 
+00C9    547F           155                 ANL   A,#01111111B                       ; | C_recu ET 01111111  
+00CB    F57B           156                 MOV   C_RECU, A                          ; |           
+00CD    A2D0           157                 MOV   C,P                                ; | (P_calcule) <-- (P)
+00CF    92F1           158                 MOV   B.1,C                              ; | 
+00D1    B2F1           159                 CPL   B.1                                ; | /(P_calcule)
+00D3    A2F0           160                 MOV   C,B.0                              ; | Resultat <-- (P_recu) XOR (P_calcule)
+00D5    B0F1           161                 ANL   C,/B.1                             ; |
+00D7    92D5           162                 MOV   F0,C                               ; | 
+00D9    A2F1           163                 MOV   C,B.1                              ; | 
+00DB    B0F0           164                 ANL   C,/B.0                             ; |       
+00DD    72D5           165                 ORL   C,F0                               ; | 
+00DF    4056           166     ZSI_PARITE:   JC   FSI_PARITE                          ; | Si (Resultat) = 0       
+00E1    30000A         167     SI_T0:       JNB   FLAG_T0,FSI_T0                     ; | | Si (Flag_T0) = 1 alors
+00E4    C28C           168           	   CLR   TR0                                ; | | | Reinitialiser le timer0
+00E6    758C02         169     MOV TH0 , # 2 
+00E9    758A18         170     MOV TL0 , # 24 
+00EC    D28C           171     				SETB  TR0                                ; | | |
+                       172     FSI_T0:                                               ; | | Fin de si                                                                                   
+00EE    B57C03         173           	   CJNE  A,C_PREC,SI_DIFF                   ; | | Si (C_prec) != (C_recu)  
+00F1    020137         174           	   LJMP  FSI_DIFF                           ; | | | 
+                       175     SI_DIFF: 		                                         ; | | | 
+00F4    B45606         176     CAS_V: 		CJNE  A,#'V',CAS_R                       ; | | | Cas (RXD) = 'V' 
+00F7    12013E         177     				LCALL VERT    		                       ; | | | | Vert()
+00FA    020134         178     FCAS_V:      LJMP	FCAS                               ; | | | Fin cas 'V' 
+00FD    B45206         179     CAS_R: 	   CJNE  A,#'R',CAS_G	                    ; | | | Cas (RXD) = 'R'
+0100    120147         180                 LCALL ROUGE                              ; | | | | Rouge()
+0103    020134         181     FCAS_R:      LJMP	FCAS                               ; | | | Fin cas 'R'
+0106    B44706         182     CAS_G: 	   CJNE  A,#'G',CAS_C	                    ; | | | Cas (RXD) = 'G'
+0109    120163         183                 LCALL GAUCHE                             ; | | | | Gauche()
+010C    020134         184     FCAS_G:      LJMP	FCAS                               ; | | | Fin cas 'G'
+010F    B44306         185     CAS_C: 	   CJNE  A,#'C',CAS_D	                    ; | | | Cas (RXD) = 'C'
+0112    120174         186                 LCALL CENTRE                             ; | | | | Centre()
+0115    020134         187     FCAS_C:      LJMP	FCAS                               ; | | | Fin cas 'C'
+0118    B44406         188     CAS_D: 	   CJNE  A,#'D',CAS_A	                    ; | | | Cas (RXD) = 'D'
+011B    120185         189                 LCALL DROITE                             ; | | | | Droite()
+011E    020134         190     FCAS_D:      LJMP	FCAS                               ; | | | Fin cas 'D' 
+0121    B44110         191     CAS_A: 	   CJNE  A,#'A',FCAS                        ; | | | Cas (RXD) = 'A'
+0124    120196         192                 LCALL ABSENT                             ; | | | | Absence()
+0127    E57C           193     SI_G:        MOV   A,C_PREC                           ; | | | | Si (C_prec) = 'G'
+0129    B44708         194                 CJNE  A,#'G',FSI_G                       ; | | | | | 
+012C    D292           195                 SETB  LASER                              ; | | | | | (Laser) <-- OFF
+012E    C291           196                 CLR   SIRENE                             ; | | | | | 
+0130    C28C           197                 CLR   TR0                                 
+0132    C200           198                 CLR   FLAG_T0                             
+                       199     FSI_G:                                                ; | | | | Fin Si                                        
+                       200     FCAS: 			                                         ; | | | Fin cas 
+0134    857B7C         201                 MOV   C_PREC,C_RECU                      ; | | (C_prec) <-- (C_recu)
+                       202     FSI_DIFF:                                             ; | | Fin Si           
+                       203     FSI_PARITE:                                           ; | Fin Si            
+0137    D0E0           204     				POP	ACC			                       ; |
+0139    D0F0           205     				POP   B                                  ; | 
+013B    D0D0           206     				POP	PSW				                    ; |
+013D    32             207     				RETI						                    ; fin
+                       208     				
+                       209     
+                       210     ; -----------------------------------------------------------------
+                       211     ; Vert
+                       212     ; Parametres passes: 
+                       213     ; Parametres retournes:
+                       214     VERT: 									   ; debut
+013E    C290           215                 CLR   LED_R          ; | LED_R <= 0
+0140    D293           216                 SETB  INFO_M_A       ; | Definir l etat de la voiture en marche
+0142    D294           217                 SETB  CAR_M_A        ; | Demarer la voiture
+0144    C294           218                 CLR   CAR_M_A        ; |  
+0146    22             219     				RET						; fin		
+                       220     ; -----------------------------------------------------------------
+                       221     ; Rouge
+                       222     ; Parametres passes:
+                       223     ; Parametres retournes:
+                       224     ROUGE: 									      ; debut
+0147    C0E0           225                 PUSH  ACC                  ; | 
+0149    D290           226                 SETB  LED_R                ; | LED_R <= 1
+                       227                                      
+014B    0F             228     INC R7 
+014C    748A           229     MOV A , # 138 
+014E    120211         230     				LCALL	LCD_CODE             ; | LCD_Code(LCD_NbTr)
+0151    EF             231     MOV A , R7 
+0152    120203         232     			   LCALL	LCD_DATA			      ; | LCD_Data((Nb_Tr))
+0155    BF3302         233     SI_NB_TR:  CJNE R7 , # 33H , FSI_NB_TR 
+0158    C2AC           234     			   CLR   ES                   ; | | Devalider l'IT_serie
+                       235     FSI_NB_TR:                              ; | Fin Si
+                       236     			   
+015A    C293           237                 CLR   INFO_M_A             ; | Definir l etat de la voiture en arret
+015C    D294           238                 SETB  CAR_M_A              ; | Arreter la voiture
+015E    C294           239                 CLR   CAR_M_A              ; | 
+                       240                 
+0160    D0E0           241                 POP   ACC                  ; | 
+0162    22             242     				RET						      ; fin
+                       243     				
+                       244     ; -----------------------------------------------------------------
+                       245     ; Gauche
+                       246     ; Parametres passes:
+                       247     ; Parametres retournes:
+                       248     GAUCHE: 									; debut
+0163    C0E0           249                 PUSH  ACC
+0165    057F           250                 INC   COMPTEUR_G     ; | Incrementer le compteur G
+0167    74C2           251     MOV A , # 194 
+0169    120211         252     				LCALL	LCD_CODE       ; | LCD_Code(LCD_G)
+016C    E57F           253     				MOV   A, COMPTEUR_G  ; | 
+016E    120203         254     			   LCALL	LCD_DATA			; | LCD_Data((Compteur_G))
+0171    D0E0           255     			   POP   ACC            ; |
+0173    22             256     				RET						; fin		
+                       257     				
+                       258     ; -----------------------------------------------------------------
+                       259     ; Centre
+                       260     ; Parametres passes:
+                       261     ; Parametres retournes:
+                       262     CENTRE: 									; debut
+0174    C0E0           263                 PUSH  ACC
+0176    057E           264                 INC   COMPTEUR_C     ; | Incrementer le compteur C           
+0178    74C6           265     MOV A , # 198 
+017A    120211         266     				LCALL	LCD_CODE       ; | LCD_Code(LCD_C)
+017D    E57E           267     				MOV   A, COMPTEUR_C  ; | 
+017F    120203         268     			   LCALL	LCD_DATA			; | LCD_Data((Compteur_C))
+0182    D0E0           269     			   POP   ACC			   
+0184    22             270     				RET						; fin
+                       271     ; -----------------------------------------------------------------
+                       272     ; Droite
+                       273     ; Parametres passes:
+                       274     ; Parametres retournes:
+                       275     DROITE: 									; debut
+0185    C0E0           276                 PUSH  ACC
+0187    057D           277                 INC   COMPTEUR_D   ; | Incrementer le compteur D          
+0189    74CA           278     MOV A , # 202 
+018B    120211         279     				LCALL	LCD_CODE       ; | LCD_Code(LCD_D)
+018E    E57D           280     				MOV   A, COMPTEUR_D  ; | 
+0190    120203         281     			   LCALL	LCD_DATA			; | LCD_Data((Compteur_D))
+0193    D0E0           282                 POP   ACC
+0195    22             283                 RET						; fin
+                       284     ; -----------------------------------------------------------------
+                       285     ; Absence
+                       286     ; Parametres passes:
+                       287     ; Parametres retournes:
+                       288     ABSENT: 									; debut
+0196    C292           289                 CLR  LASER           ; | Allumer le laser
+0198    D291           290                 SETB  SIRENE         ; | Allumer la sirene
+019A    D200           291                 SETB  FLAG_T0        ; | Allumer le Timer0
+019C    C28C           292                 CLR   TR0
+019E    758C02         293     MOV TH0 , # 2 
+01A1    758A18         294     MOV TL0 , # 24 
+01A4    D28C           295                 SETB  TR0
+01A6    22             296     				RET						; fin		
+                       297     					
+                       298     				
+                       299     				
+                       300     				
+                       301     ; -----------------------------------------------------------------
+                       302     ; Initialisation l'écran LCD
+                       303     ; Parametres passes:
+                       304     ; Parametres retournes:
+                       305     LCD_INIT: 								; debut
+01A7    1201DC         306     			   LCALL	LCD_CONFIG		; | LCD_Config()
+01AA    7480           307     MOV A , # 128 
+01AC    120211         308     			   LCALL	LCD_CODE			; |
+01AF    900030         309     			   MOV	DPTR,#TXT_L1	; | LCD_Msg(Txt_L1)
+01B2    1201F4         310     			   LCALL	LCD_MSG			; |
+01B5    74C0           311     MOV A , # 192 
+01B7    120211         312     			   LCALL	LCD_CODE			; |
+01BA    900041         313     			   MOV	DPTR,#TXT_L2	; | LCD_Msg(Txt_L2)
+01BD    1201F4         314     			   LCALL	LCD_MSG			; |	
+01C0    22             315     				RET						; fin	
+                       316     				
+                       317     ; -----------------------------------------------------------------
+                       318     ; Attente Busy Flag
+                       319     ; Parametres passes:
+                       320     ; Parametres retournes:
+                       321     LCD_BF: 								; debut
+01C1    C0E0           322     			PUSH	ACC				; |
+01C3    7580FF         323     			MOV	LCD_DB,#0FFH	; | Port DB en entree
+01C6    C2A7           324     			CLR	LCD_RS			; | Lecture registre instruction
+01C8    D2A6           325     			SETB	LCD_RW			; | 
+                       326     RPT_BF: 								; | repeter
+01CA    C2A5           327              CLR	LCD_E				; | | Attendre 80us avec E bas
+01CC    7428           328     			MOV	A,#40				; | | 
+01CE    D5E0FD         329     ATT_80: 	DJNZ	ACC,ATT_80		; | | 
+01D1    D2A5           330     			SETB	LCD_E				; | | Front montant E
+01D3    00             331     			NOP						; | | Attente de 1us
+01D4    2087F3         332     JSQ_BF: 	JB		BF,RPT_BF		; | jusqu'a (BF) = 0
+01D7    C2A5           333     			CLR	LCD_E				; |
+01D9    D0E0           334     			POP	ACC				; |
+01DB    22             335     			RET						; fin
+                       336     			
+                       337     ; -----------------------------------------------------------------
+                       338     ; Configuration LCD
+                       339     ; Parametres passes:
+                       340     ; Parametres retournes:
+                       341     LCD_CONFIG: 							; debut
+01DC    C0E0           342     			PUSH	ACC				; |
+01DE    850080         343     			MOV	LCD_DB,00H		; | Ports LCD bas
+01E1    8500A0         344     			MOV	LCD_BC,00H		; | 
+01E4    12021F         345     			LCALL TEMPO          ; | Tempo()
+01E7    7438           346     			MOV	A,#00111000B	; | 8bits, 2lignes, 5x8
+01E9    120211         347     			LCALL LCD_CODE       ; | LCD_Code()
+01EC    740C           348     			MOV	A,#00001100B	; | Display On, Cursor Off, Blinking Off
+01EE    120211         349     			LCALL LCD_CODE       ; | LCD_Code()
+01F1    D0E0           350     			POP	ACC				; |
+01F3    22             351     			RET						; fin
+                       352     
+                       353     ; -----------------------------------------------------------------
+                       354     ; Ecriture message
+                       355     ; Parametres passes:DPTR=@Txt
+                       356     ; Parametres retournes:
+                       357     LCD_MSG: 								; debut
+01F4    C0E0           358     			PUSH	ACC				; |
+01F6    E4             359     TQ_MSG: 	CLR	A					; | tant que ((Txt)) != 0
+01F7    93             360     			MOVC	A,@A+DPTR		; | |
+01F8    6006           361     			JZ		FTQ_MSG			; | |
+01FA    120203         362              LCALL	LCD_DATA       ; | | LCD_Data( ((Txt)) )
+01FD    A3             363              INC	DPTR           ; | | (Txt) = (Txt) + 1
+01FE    80F6           364     			SJMP	TQ_MSG			; | |
+                       365     FTQ_MSG: 	                     ; | fin tant que
+0200    D0E0           366     			POP	ACC				; |
+0202    22             367     			RET						; fin
+                       368     						
+                       369     ; -----------------------------------------------------------------
+                       370     ; Envoie data LCD
+                       371     ; Parametres passes:DATA=A
+                       372     ; Parametres retournes:
+                       373     LCD_DATA: 							; debut
+0203    1201C1         374     			LCALL	LCD_BF			; | LCD_BF()
+0206    D2A7           375     			SETB	LCD_RS			; | Ecriture registre donnee
+0208    C2A6           376     			CLR	LCD_RW			; | 
+020A    F580           377     			MOV	LCD_DB,A			; | Ecriture donnee sur le bus
+020C    D2A5           378     			SETB	LCD_E				; | Front descendant E
+020E    C2A5           379     			CLR	LCD_E				; |			
+0210    22             380     			RET						; fin		
+                       381     				
+                       382     ; -----------------------------------------------------------------
+                       383     ; Envoie instruction LCD
+                       384     ; Parametres passes:INST=A
+                       385     ; Parametres retournes:
+                       386     LCD_CODE: 							; debut
+0211    1201C1         387     			LCALL LCD_BF  			; | LCD_BF()
+0214    C2A7           388     			CLR	LCD_RS			; | Ecriture registre instruction
+0216    C2A6           389     			CLR	LCD_RW			; | 
+0218    F580           390     			MOV	LCD_DB,A			; | Ecriture donnee sur le bus
+021A    D2A5           391     			SETB	LCD_E				; | Front descendant E
+021C    C2A5           392     			CLR	LCD_E				; |			
+021E    22             393     			RET						; fin
+                       394     						
+                       395     ; -----------------------------------------------------------------
+                       396     ; Temporisation de 50ms
+                       397     ; Parametres passes:
+                       398     ; Parametres retournes:
+                       399     TEMPO: 								; debut
+021F    7864           400     			MOV	R0,#100			; | (R0) <= 100
+                       401     RPT_T0: 	                     ; | repeter
+0221    79FF           402     			MOV	R1,#0FFH	      ; | | (R1) <= FFh
+                       403     RPT_T1:                        ; | | repeter
+0223    D9FE           404     			DJNZ	R1,RPT_T1		; | | | (R1) <= (R1) - 1
+                       405     										; | | jusqu'a (R1) = 0
+0225    D8FA           406     			DJNZ	R0,RPT_T0		; | | (R0) <= (R0) - 1
+                       407     										; | jusqu'a (R0) = 0
+0227    22             408     			RET						; fin
+                       409     			
+                       410     ; -----------------------------------------------------------------
+                       411     ; Fin d assemblage
+                       412     				END
+MACRO ASSEMBLER MAIN                                        01/28/25 13:46:39 PAGE     0
 
 
 SYMBOL TABLE LISTING
@@ -90,40 +434,144 @@ SYMBOL TABLE LISTING
 
 N A M E             T Y P E  V A L U E   ATTRIBUTES             REFERENCES
 
-P0 . . . . . . . .  D ADDR   0080H   A                          7 8 
-FSN_IT . . . . . .  C ADDR   0055H   A                          45 49# 
-VAL. . . . . . . .  ? ADDR   0000H   A                          44 48 
-SP . . . . . . . .  D ADDR   0081H   A                          23 
-LED_R. . . . . . .  B ADDR   0080H.0 A                          7# 
-ACC. . . . . . . .  D ADDR   00E0H   A                          34 50 
-LED_V. . . . . . .  B ADDR   0080H.1 A                          8# 
-RB8. . . . . . . .  B ADDR   0098H.2 A                          38 40 
-TH1. . . . . . . .  D ADDR   008DH   A                          62 
-IE . . . . . . . .  D ADDR   00A8H   A                          65 
-TH1_CHRG . . . . .  N NUMB   00E6h                              10# 62 63 
-P. . . . . . . . .  B ADDR   00D0H.0 A                          37 41 
-SBUF . . . . . . .  D ADDR   0099H   A                          36 
-PCON . . . . . . .  D ADDR   0087H   A                          61 
-TL1. . . . . . . .  D ADDR   008BH   A                          63 
-SCON . . . . . . .  D ADDR   0098H   A                          59 
-INIT . . . . . . .  C ADDR   005AH   A                          24 58# 
-IT_SERIE . . . . .  C ADDR   0036H   A                          17 32# 
-DEBUT. . . . . . .  C ADDR   0030H   A                          15 22# 
-TMOD . . . . . . .  D ADDR   0089H   A                          60 
-TCON . . . . . . .  D ADDR   0088H   A                          64 
-F0 . . . . . . . .  B ADDR   00D0H.5 A                          39 42 
-SI_IT. . . . . . .  C ADDR   004AH   A                          43# 
-P_FALSE. . . . . .  ? ADDR   0000H   A                          44 
-PSW. . . . . . . .  D ADDR   00D0H   A                          33 51 
-RI . . . . . . . .  B ADDR   0098H.0 A                          35 
-SN_IT. . . . . . .  C ADDR   0051H   A                          43 46# 
-FIN. . . . . . . .  C ADDR   0036H   A                          26# 
-FSI_IT . . . . . .  C ADDR   004FH   A                          45# 
+FCAS_D . . . . . .  C ADDR   011EH   A                          190# 
+P0 . . . . . . . .  D ADDR   0080H   A                          19 
+CENTRE . . . . . .  C ADDR   0174H   A                          186 262# 
+VERT . . . . . . .  C ADDR   013EH   A                          177 214# 
+P1 . . . . . . . .  D ADDR   0090H   A                          7 9 10 12 13 
+SI_G . . . . . . .  C ADDR   0127H   A                          193# 
+ROUGE. . . . . . .  C ADDR   0147H   A                          180 224# 
+CAR_M_A. . . . . .  B ADDR   0090H.4 A                          10# 81 119 120 217 
+                                                                218 238 239 
+B. . . . . . . . .  D ADDR   00F0H   A                          149 154 158 159 160 
+                                                                161 163 164 205 
+P2 . . . . . . . .  D ADDR   00A0H   A                          15 
+FCAS_G . . . . . .  C ADDR   010CH   A                          184# 
+BP_R . . . . . . .  B ADDR   00B0H.2 A                          21# 
+P3 . . . . . . . .  D ADDR   00B0H   A                          21 22 
+SP . . . . . . . .  D ADDR   0081H   A                          68 
+FSI_T0 . . . . . .  C ADDR   00EEH   A                          167 172# 
+TEMPO. . . . . . .  C ADDR   021FH   A                          126 345 399# 
+FTQ_INT0 . . . . .  C ADDR   00B1H   A                          124 128# 
+REN. . . . . . . .  B ADDR   0098H.4 A                          139 
+FSI_PARITE . . . .  C ADDR   0137H   A                          166 203# 
+LCD_INIT . . . . .  C ADDR   01A7H   A                          95 305# 
+SIRENE . . . . . .  B ADDR   0090H.1 A                          12# 84 106 196 290 
+                                                                
+LED_R. . . . . . .  B ADDR   0090H.0 A                          7# 80 122 140 215 
+                                                                226 
+EA . . . . . . . .  B ADDR   00A8H.7 A                          117 
+DROITE . . . . . .  C ADDR   0185H   A                          189 275# 
+BP_V . . . . . . .  B ADDR   00B0H.3 A                          22# 
+ACC. . . . . . . .  D ADDR   00E0H   A                          116 131 150 153 204 
+                                                                225 241 249 255 263 
+                                                                269 276 282 322 329 
+                                                                334 342 350 358 366 
+                                                                
+LCD_CONFIG . . . .  C ADDR   01DCH   A                          306 341# 
+FSI_G. . . . . . .  C ADDR   0134H   A                          194 199# 
+CAS_R. . . . . . .  C ADDR   00FDH   A                          176 179# 
+JSQ_INT0 . . . . .  C ADDR   00B1H   A                          130# 
+LCD_NBTR . . . . .  N NUMB   008Ah                              35# 229 
+BF . . . . . . . .  B ADDR   0080H.7 A                          24# 332 
+TQ_MSG . . . . . .  C ADDR   01F6H   A                          359# 364 
+LCD_DATA . . . . .  C ADDR   0203H   A                          232 254 268 281 362 
+                                                                373# 
+CAS_V. . . . . . .  C ADDR   00F4H   A                          176# 
+C_PREC . . . . . .  D ADDR   007CH   A                          29# 77 173 193 201 
+                                                                
+TH0. . . . . . . .  D ADDR   008CH   A                          169 293 
+LCD_CODE . . . . .  C ADDR   0211H   A                          230 252 266 279 308 
+                                                                312 347 349 386# 
+                                                                
+GAUCHE . . . . . .  C ADDR   0163H   A                          183 248# 
+IT_TIMER0. . . . .  C ADDR   0092H   A                          55 104# 
+TH1. . . . . . . .  D ADDR   008DH   A                          92 
+FCAS_R . . . . . .  C ADDR   0103H   A                          181# 
+IE . . . . . . . .  D ADDR   00A8H   A                          97 
+TH0_CHRG . . . . .  N NUMB   0002h                              46# 169 293 
+N_ROUGE. . . . . .  N NUMB   000Ah                              42# 123 
+LCD_L1 . . . . . .  N NUMB   0080h                              34# 35 307 
+ATT_80 . . . . . .  C ADDR   01CEH   A                          329# 
+SI_NB_TR . . . . .  C ADDR   0155H   A                          233# 
+RPT_INT0 . . . . .  C ADDR   00A5H   A                          121# 130 
+TH1_CHRG . . . . .  N NUMB   00E6h                              44# 92 93 
+LCD_L2 . . . . . .  N NUMB   00C0h                              36# 37 38 39 311 
+                                                                
+P. . . . . . . . .  B ADDR   00D0H.0 A                          157 
+SBUF . . . . . . .  D ADDR   0099H   A                          152 
+TL0. . . . . . . .  D ADDR   008AH   A                          170 294 
+PCON . . . . . . .  D ADDR   0087H   A                          91 
+FTQ_MSG. . . . . .  C ADDR   0200H   A                          361 365# 
+C_RECU . . . . . .  D ADDR   007BH   A                          30# 78 156 201 
+COMPTEUR_C . . . .  D ADDR   007EH   A                          27# 86 264 267 
+TL1. . . . . . . .  D ADDR   008BH   A                          93 
+FCAS_V . . . . . .  C ADDR   00FAH   A                          178# 
+COMPTEUR_D . . . .  D ADDR   007DH   A                          28# 87 277 280 
+TL0_CHRG . . . . .  N NUMB   0018h                              45# 170 294 
+SCON . . . . . . .  D ADDR   0098H   A                          89 
+SI_DIFF. . . . . .  C ADDR   00F4H   A                          173 175# 
+INIT . . . . . . .  C ADDR   005AH   A                          69 76# 
+IT_SERIE . . . . .  C ADDR   00BBH   A                          59 147# 
+DEBUT. . . . . . .  C ADDR   0052H   A                          51 67# 
+TMOD . . . . . . .  D ADDR   0089H   A                          90 
+TCON . . . . . . .  D ADDR   0088H   A                          94 
+JSQ_BF . . . . . .  C ADDR   01D4H   A                          332# 
+NB_TR. . . . . . .    REG    R7                                 40# 88 228 231 233 
+                                                                
+LCD_C. . . . . . .  N NUMB   00C6h                              38# 265 
+COMPTEUR_G . . . .  D ADDR   007FH   A                          26# 85 250 253 
+FSI_NB_TR. . . . .  C ADDR   015AH   A                          233 235# 
+LCD_D. . . . . . .  N NUMB   00CAh                              39# 278 
+TR0. . . . . . . .  B ADDR   0088H.4 A                          108 168 171 197 292 
+                                                                295 
+F0 . . . . . . . .  B ADDR   00D0H.5 A                          162 165 
+CAS_A. . . . . . .  C ADDR   0121H   A                          188 191# 
+IT_INT0. . . . . .  C ADDR   009BH   A                          53 115# 
+LCD_E. . . . . . .  B ADDR   00A0H.5 A                          18# 327 330 333 378 
+                                                                379 391 392 
+LCD_RS . . . . . .  B ADDR   00A0H.7 A                          16# 324 375 388 
+LCD_BC . . . . . .  D ADDR   00A0H   A                          15# 16 17 18 344 
+                                                                
+LASER. . . . . . .  B ADDR   0090H.2 A                          13# 83 105 195 289 
+                                                                
+IT_INT1. . . . . .  C ADDR   00B6H   A                          57 138# 
+LCD_DB . . . . . .  D ADDR   0080H   A                          19# 24 323 343 377 
+                                                                390 
+INFO_M_A . . . . .  B ADDR   0090H.3 A                          9# 82 118 216 237 
+                                                                
+PX0. . . . . . . .  B ADDR   00B8H.0 A                          96 
+ES . . . . . . . .  B ADDR   00A8H.4 A                          234 
+RPT_T0 . . . . . .  C ADDR   0221H   A                          401# 406 
+LCD_MSG. . . . . .  C ADDR   01F4H   A                          310 314 357# 
+CAS_C. . . . . . .  C ADDR   010FH   A                          182 185# 
+LCD_G. . . . . . .  N NUMB   00C2h                              37# 251 
+RPT_T1 . . . . . .  C ADDR   0223H   A                          403# 404 
+LCD_BF . . . . . .  C ADDR   01C1H   A                          321# 374 387 
+CAS_D. . . . . . .  C ADDR   0118H   A                          185 188# 
+FSI_DIFF . . . . .  C ADDR   0137H   A                          174 202# 
+ZSI_PARITE . . . .  C ADDR   00DFH   A                          166# 
+PSW. . . . . . . .  D ADDR   00D0H   A                          148 206 
+LCD_RW . . . . . .  B ADDR   00A0H.6 A                          17# 325 376 389 
+RI . . . . . . . .  B ADDR   0098H.0 A                          151 
+TXT_L1 . . . . . .  C ADDR   0030H   A                          62# 309 
+RPT_BF . . . . . .  C ADDR   01CAH   A                          326# 332 
+ABSENT . . . . . .  C ADDR   0196H   A                          192 288# 
+CAS_G. . . . . . .  C ADDR   0106H   A                          179 182# 
+FCAS . . . . . . .  C ADDR   0134H   A                          178 181 184 187 190 
+                                                                191 200# 
+FIN. . . . . . . .  C ADDR   0058H   A                          70# 
+TXT_L2 . . . . . .  C ADDR   0041H   A                          63# 313 
+FLAG_T0. . . . . .  B ADDR   0020H.0 A                          32# 79 107 167 198 
+                                                                291 
+FCAS_C . . . . . .  C ADDR   0115H   A                          187# 
+SI_T0. . . . . . .  C ADDR   00E1H   A                          167# 
+TQ_INT0. . . . . .  C ADDR   00A9H   A                          124# 127 
 
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     70    ----
+   CODE SIZE        =    519    ----
    XDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
@@ -133,4 +581,4 @@ END OF MODULE INFORMATION.
 
 REGISTER BANK(S) USED : 0 
 
-ASSEMBLY COMPLETE.   0 WARNING(S)   3 ERROR(S)
+ASSEMBLY COMPLETE.   0 WARNING(S)   0 ERROR(S)
